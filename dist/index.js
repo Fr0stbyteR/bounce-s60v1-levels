@@ -27164,8 +27164,8 @@ var Bigger = class extends GameObjectWithVariant {
 };
 Bigger.VARIANT = EnumBiggerVariant;
 Bigger.TEXTURES = [
-  "obstacle.033.png",
-  "obstacle.034.png"
+  "obstacle.031.png",
+  "obstacle.032.png"
 ];
 
 // src/Smaller.ts
