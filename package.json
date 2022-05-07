@@ -1,0 +1,23 @@
+{
+  "name": "bounce",
+  "version": "1.0.0",
+  "description": "Nokia S60v1 Bounce game",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild ./src/index.ts --outfile=dist/index.js --sourcemap --bundle --platform=browser --format=esm"
+  },
+  "keywords": [
+    "nokia",
+    "symbian",
+    "game"
+  ],
+  "author": "shren",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "buffer": "^6.0.3",
+    "esbuild": "^0.14.38",
+    "pixi.js": "^6.3.2",
+    "typescript": "^4.6.4"
+  }
+}
