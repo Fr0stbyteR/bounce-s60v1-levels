@@ -35,7 +35,7 @@ export default class Roll extends GameObjectWithVariant<EnumRollVariant> impleme
 
     constructor(variant: EnumRollVariant, x1: number, y1: number, length: number) {
         super(variant, x1, y1);
-        this._length = length;
+        this._length = ~~length;
     }
     toBinary() {
         const buffer = Buffer.alloc((this.constructor as typeof GameObjectWithVariant).BYTES);

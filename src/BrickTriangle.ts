@@ -41,7 +41,7 @@ export default class BrickTriangle extends GameObjectWithPos implements IBounceG
     constructor(x1: number, y1: number, size: number, facing: EnumBrickTriangleFacing) {
         super(x1, y1);
         this._facing = facing;
-        this._size = size;
+        this._size = ~~size;
     }
     toBinary() {
         const buffer = Buffer.alloc((this.constructor as typeof BrickTriangle).BYTES);

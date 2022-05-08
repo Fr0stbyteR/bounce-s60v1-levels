@@ -4,8 +4,8 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+var __commonJS = (cb, mod2) => function __require() {
+  return mod2 || (0, cb[__getOwnPropNames(cb)[0]])((mod2 = { exports: {} }).exports, mod2), mod2.exports;
 };
 var __export = (target, all) => {
   for (var name in all)
@@ -19,7 +19,7 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
+var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__getProtoOf(mod2)) : {}, __copyProps(isNodeMode || !mod2 || !mod2.__esModule ? __defProp(target, "default", { value: mod2, enumerable: true }) : target, mod2));
 
 // node_modules/base64-js/index.js
 var require_base64_js = __commonJS({
@@ -26860,7 +26860,7 @@ var filters = {
 // src/Level.ts
 var import_buffer7 = __toESM(require_buffer(), 1);
 
-// src/Brick.ts
+// src/GameObjectWithPos2.ts
 var import_buffer2 = __toESM(require_buffer(), 1);
 
 // src/GameObjectWithPos.ts
@@ -26899,11 +26899,10 @@ var GameObjectWithPos = class {
 };
 GameObjectWithPos.BYTES = 4;
 
-// src/Brick.ts
-var Brick = class extends GameObjectWithPos {
+// src/GameObjectWithPos2.ts
+var GameObjectWithPos2 = class extends GameObjectWithPos {
   constructor(x1, y1, x2, y2) {
     super(x1, y1);
-    this.type = "brick";
     this._pos2 = [~~x2, ~~y2];
   }
   static fromBinary(buffer, index) {
@@ -26936,7 +26935,15 @@ var Brick = class extends GameObjectWithPos {
     return buffer;
   }
 };
-Brick.BYTES = 8;
+GameObjectWithPos2.BYTES = 8;
+
+// src/Brick.ts
+var Brick = class extends GameObjectWithPos2 {
+  constructor() {
+    super(...arguments);
+    this.type = "brick";
+  }
+};
 Brick.TEXTURES = ["brick1.000.png"];
 
 // src/BrickTriangle.ts
@@ -26953,7 +26960,7 @@ var BrickTriangle = class extends GameObjectWithPos {
     super(x1, y1);
     this.type = "brick_tri";
     this._facing = facing;
-    this._size = size;
+    this._size = ~~size;
   }
   static fromBinary(buffer, index) {
     return new this(buffer.readInt16LE(index), buffer.readInt16LE(index + 2), buffer.readInt16LE(index + 4), buffer.readUInt8(index + 6));
@@ -27033,15 +27040,16 @@ Ring.TEXTURES = [
 
 // src/GameObjectMoving.ts
 var import_buffer5 = __toESM(require_buffer(), 1);
-var GameObjectMoving = class extends GameObjectWithPos {
-  constructor(y1, x1, ySpeed, xSpeed, length, data = new Uint8Array(6)) {
-    super(x1, y1);
+var mod = (x, y) => (x % y + y) % y;
+var GameObjectMoving = class extends GameObjectWithPos2 {
+  constructor(y1, x1, ySpeed, xSpeed, length, x2, y2, phase) {
+    super(x1, y1, x2, y2);
     this._speed = [~~xSpeed, ~~ySpeed];
-    this._length = length;
-    this._data = data;
+    this._length = ~~length;
+    this._phase = ~~phase;
   }
   static fromBinary(buffer, index) {
-    return new this(buffer.readInt16LE(index + 0), buffer.readInt16LE(index + 2), buffer.readInt16LE(index + 4), buffer.readInt16LE(index + 6), buffer.readUInt16LE(index + 8), buffer.slice(index + 10, index + 16));
+    return new this(buffer.readInt16LE(index + 0), buffer.readInt16LE(index + 2), buffer.readInt16LE(index + 4), buffer.readInt16LE(index + 6), buffer.readUInt16LE(index + 8), buffer.readInt16LE(index + 10), buffer.readInt16LE(index + 12), buffer.readInt16LE(index + 14));
   }
   get speed() {
     return this._speed.slice();
@@ -27055,6 +27063,12 @@ var GameObjectMoving = class extends GameObjectWithPos {
   set length(value) {
     this._length = value;
   }
+  get phase() {
+    return this._phase;
+  }
+  set phase(value) {
+    this._phase = value;
+  }
   get xSpeed() {
     return this._speed[0];
   }
@@ -27067,6 +27081,15 @@ var GameObjectMoving = class extends GameObjectWithPos {
   set ySpeed(ySpeed) {
     this._speed = [this._speed[0], ySpeed];
   }
+  get initialX() {
+    return this.x1 + this.xSpeed * mod(this.phase, this.length);
+  }
+  get initialY() {
+    return this.y1 + this.ySpeed * mod(this.phase, this.length);
+  }
+  get initialPos() {
+    return [this.initialX, this.initialY];
+  }
   toBinary() {
     const buffer = import_buffer5.Buffer.alloc(this.constructor.BYTES);
     buffer.writeInt16LE(this._pos[1], 0);
@@ -27074,7 +27097,9 @@ var GameObjectMoving = class extends GameObjectWithPos {
     buffer.writeInt16LE(this._speed[1], 4);
     buffer.writeInt16LE(this._speed[0], 6);
     buffer.writeUInt16LE(this._length, 8);
-    import_buffer5.Buffer.from(this._data).copy(buffer, 10, 0, 6);
+    buffer.writeInt16LE(this.pos2[0], 10);
+    buffer.writeInt16LE(this.pos2[1], 12);
+    buffer.writeInt16LE(this.phase, 14);
     return buffer;
   }
 };
@@ -27120,7 +27145,7 @@ var Roll = class extends GameObjectWithVariant {
   constructor(variant, x1, y1, length) {
     super(variant, x1, y1);
     this.type = "roll";
-    this._length = length;
+    this._length = ~~length;
   }
   static fromBinary(buffer, index) {
     return new this(buffer.readUInt8(index), buffer.readInt16LE(index + 1), buffer.readInt16LE(index + 3), buffer.readInt16LE(index + 5));
@@ -27216,7 +27241,7 @@ var MovingPlat = class extends GameObjectMoving {
 MovingPlat.TEXTURES = ["obstacle.016.png"];
 
 // src/Rubber.ts
-var Rubber = class extends Brick {
+var Rubber = class extends GameObjectWithPos2 {
   constructor() {
     super(...arguments);
     this.type = "bounce";
