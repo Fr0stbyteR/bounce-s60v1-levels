@@ -2,6 +2,8 @@ import { Buffer } from "buffer";
 import * as PIXI from "pixi.js";
 import Level from "./Level";
 
+export * from "./types";
+
 export { default as Brick } from "./Brick";
 export { default as BrickTriangle } from "./BrickTriangle";
 export { default as Ring } from "./Ring";

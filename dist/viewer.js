@@ -21,17 +21,19 @@
         const r = await fetch(filename);
         const ab = await r.arrayBuffer();
         const buffer = Buffer.from(ab);
-        console.log(buffer)
         const level = Level.fromBinary(buffer, 0);
         console.log(level);
         const outBuffer = level.toBinary();
-        console.log(outBuffer);
-        console.log(outBuffer.equals(buffer));
+        console.log("in === out?", outBuffer.equals(buffer));
     
         const rect = [0, 0, 0, 0];
         for (let i = 0; i < level.objects.length; i++) {
             const obj = level.objects[i];
-            obj.constructor.TEXTURES.forEach(t => textureFiles.add(t));
+
+            /** @type {typeof import("./index").Brick} */
+            // @ts-ignore
+            const Ctor = obj.constructor;
+            Ctor.TEXTURES.forEach(t => textureFiles.add(t));
             const { x1, y1 } = obj;
             if (x1 < rect[0]) rect[0] = x1;
             if (y1 < rect[1]) rect[1] = y1;
@@ -371,6 +373,7 @@
         app.ticker.add((delta) => {
             moving.position.set(offsetX + deltaX, offsetY + deltaY);
             moving.scale.set(scale, scale);
+            // @ts-ignore
             tilingMasks.children.forEach((/** @type {import("pixi.js").TilingSprite} */sprite) => {
                 sprite.tilePosition.set(offsetX + deltaX, offsetY + deltaY);
                 sprite.tileScale.set(scale, scale);
@@ -421,11 +424,7 @@
         }
     });
     */
-
-    setTimeout(() => {
-        for (let i = 12; i <= 21; i++) {
-            drawLevel(`../res/level.${i.toString().padStart(3, "0")}`);
-        }
-    }, 1000);
+    const level = +new URLSearchParams(location.search).get("level") || 21;
+    drawLevel(`../res/level.${level.toString().padStart(3, "0")}`);
     
 })();
