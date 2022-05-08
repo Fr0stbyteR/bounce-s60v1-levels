@@ -1,11 +1,11 @@
-# Nokia S60v1 Bounce Game Level Viewer
+# Symbian S60v1 Bounce Game Level Viewer
 
-Encoder/Decoder of Level files with a web-based viewer.
+Encoder/Decoder of level files with a web-based viewer.
 
 ### URL syntax
-```
-fr0stbyter.github.io/bounce-s60v1-levels/dist/index.html?level=1
-```
+
+https://fr0stbyter.github.io/bounce-s60v1-levels/dist/index.html?level=1
+
 
 ### Screenshots
 
