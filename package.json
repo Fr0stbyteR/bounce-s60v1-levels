@@ -1,9 +1,10 @@
 {
-  "name": "bounce",
+  "name": "bounce-s60v1-levels",
   "version": "1.0.0",
-  "description": "Nokia S60v1 Bounce game",
+  "description": "Nokia S60v1 Bounce game level viewer",
   "main": "dist/index.js",
   "type": "module",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "esbuild ./src/index.ts --outfile=dist/index.js --sourcemap --bundle --platform=browser --format=esm"
   },

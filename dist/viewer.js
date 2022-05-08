@@ -425,6 +425,6 @@
     });
     */
     const level = +new URLSearchParams(location.search).get("level") || 21;
-    drawLevel(`../res/level.${level.toString().padStart(3, "0")}`);
+    drawLevel(`../res/levels/level.${level.toString().padStart(3, "0")}`);
     
 })();
