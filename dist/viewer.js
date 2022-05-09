@@ -47,6 +47,10 @@
             if (!textures[f]) textures[f] = PIXI.Texture.from(`../res/tex/${f}`)
         });
     
+        const ballTexRaw = PIXI.Texture.from("../res/tex/bounce.011.png");
+        const ballTexMask = PIXI.Texture.from("../res/tex/bounce.012.png");
+        const ballBigTexRaw = PIXI.Texture.from("../res/tex/bounce.007.png");
+        const ballBigTexMask = PIXI.Texture.from("../res/tex/bounce.008.png");
     
         const backgroundColor = 0xAADDEE;
     
@@ -83,7 +87,7 @@
         rubberGraphic.beginFill();
         waterGraphic.beginFill();
     
-        await Promise.all(Object.values(textures).map((tex) => {
+        await Promise.all([...Object.values(textures), ballBigTexRaw, ballTexMask, ballBigTexRaw, ballBigTexMask].map((tex) => {
             return new Promise((resolve, reject) => {
                 if (tex.valid) {
                     resolve();
@@ -123,6 +127,8 @@
         const spikeTex = createMaskedTex(app.renderer, textures[Spike.TEXTURES[0]], textures[Spike.TEXTURES[1]], negFilter);
         const biggerTex = createMaskedTex(app.renderer, textures[Bigger.TEXTURES[0]], textures[Bigger.TEXTURES[1]], negFilter);
         const smallerTex = createMaskedTex(app.renderer, textures[Smaller.TEXTURES[0]], textures[Smaller.TEXTURES[1]], negFilter);
+        const ballTex = createMaskedTex(app.renderer, ballTexRaw, ballTexMask, negFilter);
+        const ballBigTex = createMaskedTex(app.renderer, ballBigTexRaw, ballBigTexMask, negFilter);
     
         const blowBaseSprite = new PIXI.Sprite(textures[Blow.TEXTURES[3]]);
         /** @type {import("pixi.js").RenderTexture[]} */
@@ -150,7 +156,7 @@
             suckTexArray.push(tex);
         }
     
-        await Promise.all([ringBigTex, ringTex, vAccelTex, hAccelTex, inverseTex, spikeTex, biggerTex, smallerTex, ...blowTexArray, ...suckTexArray].map((tex) => {
+        await Promise.all([ringBigTex, ringTex, vAccelTex, hAccelTex, inverseTex, spikeTex, biggerTex, smallerTex, ...blowTexArray, ...suckTexArray, ballTex, ballBigTex].map((tex) => {
             return new Promise((resolve, reject) => {
                 if (tex.valid) {
                     resolve();
@@ -354,6 +360,10 @@
                 smallObjects.addChild(cont);
             }
         }
+        const ball = new PIXI.Sprite(level.initialBallIsBig ? ballBigTex : ballTex);
+        ball.position.set(...level.initialPos);
+        smallObjects.addChild(ball);
+
         bricksGraphic.endFill();
         rubberGraphic.endFill();
         waterGraphic.endFill();
@@ -370,13 +380,19 @@
         let deltaX = 0;
         let deltaY = 0;
         let scale = 1;
-        app.ticker.add((delta) => {
-            moving.position.set(offsetX + deltaX, offsetY + deltaY);
-            moving.scale.set(scale, scale);
-            // @ts-ignore
-            tilingMasks.children.forEach((/** @type {import("pixi.js").TilingSprite} */sprite) => {
-                sprite.tilePosition.set(offsetX + deltaX, offsetY + deltaY);
-                sprite.tileScale.set(scale, scale);
+
+        let rendered = false;
+        return new Promise((resolve, reject) => {
+            app.ticker.add((delta) => {
+                moving.position.set(offsetX + deltaX, offsetY + deltaY);
+                moving.scale.set(scale, scale);
+                // @ts-ignore
+                tilingMasks.children.forEach((/** @type {import("pixi.js").TilingSprite} */sprite) => {
+                    sprite.tilePosition.set(offsetX + deltaX, offsetY + deltaY);
+                    sprite.tileScale.set(scale, scale);
+                });
+                if (!rendered) resolve(app);
+                rendered = true;
             });
         });
         /*
@@ -404,7 +420,7 @@
             window.addEventListener("mouseup", onup);
         });
         */
-       return app;
+        // return app;
     };
     /*
     app.view.addEventListener("wheel", (e) => {
@@ -425,6 +441,14 @@
     });
     */
     const level = +new URLSearchParams(location.search).get("level") || 21;
-    drawLevel(`../res/levels/level.${level.toString().padStart(3, "0")}`);
+    const app = await drawLevel(`../res/levels/level.${level.toString().padStart(3, "0")}`);
+    app.view.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.download = `${level.toString().padStart(3, "0")}.png`;
+        a.href = url;
+        document.body.appendChild(a);
+        a.innerText = `Download PNG ${level.toString().padStart(3, "0")}.png`;
+    });
     
 })();

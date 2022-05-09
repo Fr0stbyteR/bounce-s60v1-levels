@@ -20,7 +20,7 @@ import Suck from "./Suck";
 import VAccel from "./VAccel";
 import Water from "./Water";
 
-export type BounceGameObjectType = "brick" | "brick_tri" | "bounce" | "bounce_tri" | "water"
+export type BounceGameObjectType = "brick" | "brick_tri" | "rubber" | "rubber_tri" | "water"
     | "smaller" | "bigger" 
     | "ring" | "ring_big" 
     | "spike" | "moving_spike" | "moving_plat"
